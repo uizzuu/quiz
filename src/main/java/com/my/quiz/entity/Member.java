@@ -2,6 +2,7 @@ package com.my.quiz.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -12,8 +13,10 @@ import java.util.List;
 
 @Entity
 @Data
+@ToString
 @EntityListeners(AuditingEntityListener.class)
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
@@ -36,6 +39,7 @@ public class Member {
     private LocalDateTime updatedAt;
 
     // Member가 작성한 Quiz 목록
+    @ToString.Exclude
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
 
