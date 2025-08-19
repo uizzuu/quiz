@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>퀴즈 플레이</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 40px;
+            border: 2px solid #111;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+        }
+
+        .quiz-title {
+            font-size: 2.5em;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .quiz-info {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .quiz-content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 2px solid #111;
+        }
+
+        .question {
+            font-size: 1.4em;
+            font-weight: 500;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .answer-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .answer-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #111;
+            min-width: 120px;
+            background: #111;
+            color: #f2f2f2;
+        }
+
+        .answer-btn:hover {
+            background: #f2f2f2;
+            border-color: #111;
+            color: #111;
+        }
+
+        .member-select {
+            margin: 20px 0;
+        }
+
+        .member-select select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .navigation {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 600px) {
+            .answer-options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .answer-btn {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="quiz-header">
+        <div class="quiz-title">🎮 퀴즈 타임!</div>
+        <div class="quiz-info">총 <span th:text="${totalQuizCount}">10</span>개의 퀴즈 중 하나를 풀어보세요</div>
+    </div>
+
+    <div class="quiz-content">
+        <div class="question" th:text="${quiz.content}">
+            이것은 샘플 퀴즈 질문입니다. 정답은 예 또는 아니오 중 하나입니다.
+        </div>
+
+        <form method="post" action="/quiz/check">
+            <input type="hidden" name="quizId" th:value="${quiz.id}">
+
+            <div class="member-select">
+                <label for="memberNo">플레이어 선택 (선택사항):</label>
+                <select id="memberNo" name="memberNo">
+                    <option value="">익명으로 플레이</option>
+                    <!-- 실제로는 승인된 회원 목록을 가져와야 함 -->
+                    <option value="1">테스트 유저</option>
+                </select>
+            </div>
+
+            <div class="answer-options">
+                <button type="submit" name="userAnswer" value="true" class="answer-btn btn-yes">
+                    ✅ 예
+                </button>
+                <button type="submit" name="userAnswer" value="false" class="answer-btn btn-no">
+                    ❌ 아니오
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="navigation">
+        <a href="/quiz/play" class="nav-btn">🔄 다른 퀴즈</a>
+        <a href="/quiz/list" class="nav-btn">📝 퀴즈 목록</a>
+        <a href="/" class="nav-btn">🏠 메인으로</a>
+    </div>
+</div>
+</body>
+</html>

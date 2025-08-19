@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 상세정보</title>
+  <style>
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .info-table th, .info-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+    .info-table th {
+        background-color: #f2f2f2;
+        width: 150px;
+    }
+    .play-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .play-table th, .play-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .play-table th {
+        background-color: #f2f2f2;
+    }
+    .status-approved {
+        color: green;
+        font-weight: bold;
+    }
+    .status-pending {
+        color: red;
+        font-weight: bold;
+    }
+    .section-title {
+        margin-top: 30px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #333;
+    }
+    .btn-container {
+        text-align: center;
+        margin: 30px 0;
+    }
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 0 10px;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+    .btn-secondary:hover {
+        background-color: #545b62;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>회원 상세정보</h1>
+
+  <!-- 회원 기본 정보 -->
+  <table class="info-table">
+    <tr>
+      <th>회원번호</th>
+      <td th:text="${member.no}">1</td>
+    </tr>
+    <tr>
+      <th>아이디</th>
+      <td th:text="${member.id}">testuser</td>
+    </tr>
+    <tr>
+      <th>비밀번호</th>
+      <td th:text="${member.password}">password</td>
+    </tr>
+    <tr>
+      <th>승인상태</th>
+      <td>
+        <span th:if="${member.status}" class="status-approved">승인</span>
+        <span th:unless="${member.status}" class="status-pending">미승인</span>
+      </td>
+    </tr>
+    <tr>
+      <th>정답 수</th>
+      <td th:text="${member.answerTrue}">0</td>
+    </tr>
+    <tr>
+      <th>오답 수</th>
+      <td th:text="${member.answerFalse}">0</td>
+    </tr>
+    <tr>
+      <th>정답률</th>
+      <td>
+                <span th:if="${member.answerTrue + member.answerFalse > 0}">
+                    <span th:text="${#numbers.formatDecimal((member.answerTrue * 100.0) / (member.answerTrue + member.answerFalse), 1, 1)}">0.0</span>%
+                </span>
+        <span th:unless="${member.answerTrue + member.answerFalse > 0}">
+                    아직 퀴즈를 풀지 않았습니다
+                </span>
+      </td>
+    </tr>
+    <tr>
+      <th>가입일</th>
+      <td th:text="${#temporals.format(member.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</td>
+    </tr>
+    <tr>
+      <th>최종 수정일</th>
+      <td th:text="${#temporals.format(member.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</td>
+    </tr>
+  </table>
+
+  <!-- 퀴즈 플레이 기록 섹션 -->
+  <h3 class="section-title">퀴즈 플레이 기록</h3>
+  <table class="play-table">
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>정답 수</th>
+      <th>오답 수</th>
+      <th>정답률</th>
+      <th>플레이 날짜</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${plays == null or #lists.isEmpty(plays)}">
+      <td colspan="5">아직 퀴즈 플레이 기록이 없습니다.</td>
+    </tr>
+    <tr th:unless="${plays == null or #lists.isEmpty(plays)}"
+        th:each="play : ${plays}" th:object="${play}">
+      <td th:text="*{id}">1</td>
+      <td th:text="*{yes}">5</td>
+      <td th:text="*{no}">2</td>
+      <td>
+                    <span th:if="*{yes + no > 0}">
+                        <span th:text="${#numbers.formatDecimal((*{yes} * 100.0) / (*{yes} + *{no}), 1, 1)}">71.4</span>%
+                    </span>
+        <span th:unless="*{yes + no > 0}">0%</span>
+      </td>
+      <td th:text="${#temporals.format(play.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 작성한 퀴즈 섹션 -->
+  <h3 class="section-title">작성한 퀴즈</h3>
+  <table class="play-table">
+    <thead>
+    <tr>
+      <th>퀴즈 번호</th>
+      <th>퀴즈 내용</th>
+      <th>정답</th>
+      <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${quizzes == null or #lists.isEmpty(quizzes)}">
+      <td colspan="4">작성한 퀴즈가 없습니다.</td>
+    </tr>
+    <tr th:unless="${quizzes == null or #lists.isEmpty(quizzes)}"
+        th:each="quiz : ${quizzes}" th:object="${quiz}">
+      <td th:text="*{id}">1</td>
+      <td th:text="*{content}" style="text-align: left; max-width: 300px;">퀴즈 내용</td>
+      <td>
+        <span th:if="*{answer}" style="color: blue;">예</span>
+        <span th:unless="*{answer}" style="color: red;">아니오</span>
+      </td>
+      <td th:text="${#temporals.format(quiz.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 버튼 영역 -->
+  <div class="btn-container">
+    <a th:href="@{/member/updateView(updateId=${member.id})}" class="btn">수정</a>
+    <form style="display: inline;" th:action="@{/member/delete/{id}(id=${member.no})}" method="post">
+      <input type="submit" value="삭제" class="btn btn-secondary"
+             onclick="return confirm('정말 삭제하시겠습니까?')"
+             style="border: none; cursor: pointer;">
+    </form>
+    <a href="/list" class="btn btn-secondary">목록으로</a>
+    <a href="/" class="btn btn-secondary">메인화면</a>
+  </div>
+</div>
+</body>
+</html>

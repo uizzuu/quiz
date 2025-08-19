@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>새 퀴즈 등록</title>
+  <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    input[type="text"], textarea, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    textarea {
+        height: 100px;
+        resize: vertical;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 20px;
+        margin-top: 5px;
+    }
+
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .error {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+
+    .button-group {
+        text-align: center;
+        margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>📝 새 퀴즈 등록</h1>
+
+  <form th:action="@{/quiz/insert}" method="post" th:object="${dto}">
+    <div class="form-group">
+      <label for="content">퀴즈 내용 *</label>
+      <textarea id="content" name="content" th:field="*{content}"
+                placeholder="퀴즈 질문을 입력하세요" required></textarea>
+      <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="error"></div>
+    </div>
+
+    <div class="form-group">
+      <label>정답 *</label>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" id="answer_true" name="answer" value="true" th:field="*{answer}">
+          <label for="answer_true">예</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" id="answer_false" name="answer" value="false" th:field="*{answer}">
+          <label for="answer_false">아니오</label>
+        </div>
+      </div>
+      <div th:if="${#fields.hasErrors('answer')}" th:errors="*{answer}" class="error"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="memberNo">작성자 *</label>
+      <select id="memberNo" name="memberNo" th:field="*{memberNo}" required>
+        <option value="">작성자를 선택하세요</option>
+        <option th:each="member : ${memberList}"
+                th:value="${member.no}"
+                th:text="${member.id}">회원</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <input type="submit" value="등록" class="btn btn-primary">
+      <a href="/quiz/list" class="btn btn-secondary">취소</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>
