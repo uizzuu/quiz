@@ -78,6 +78,48 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* 퀴즈 내용 열은 남는 공간을 모두 차지하도록 설정 */
+        th:nth-child(1), td:nth-child(1) {
+            width: auto;
+        }
+        td:nth-child(1) {
+            text-align:left;
+        }
+
+        /* 정답 열은 너비를 고정하고, 텍스트가 줄바꿈되지 않도록 설정 */
+        th:nth-child(2), td:nth-child(2) {
+            width: 80px; /* 적절한 너비로 조정 가능 */
+            text-align: center;
+            white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+        }
+
+        /* 등록일 열도 너비를 고정 */
+        th:nth-child(3), td:nth-child(3) {
+            width: 120px; /* 적절한 너비로 조정 가능 */
+            text-align: center;
+        }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        background: #111;
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: 2px solid #111;
+        cursor: pointer;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+
+    .btn:hover {
+        background-color: #f6f6f6;
+        border: 2px solid #111;
+        color: #111;
+    }
     </style>
 </head>
 <body>
@@ -136,7 +178,11 @@
         </tbody>
     </table>
 
-    <a class="back-link" th:href="@{/member/list}">멤버 리스트로 돌아가기</a>
+
+    <!-- 빠른 액션 버튼들 -->
+    <div style="margin: 30px 0;">
+        <a href="/" class="btn" style="margin: 0 10px;">메인화면으로</a>
+    </div>
 
     <!-- 퀴즈 목록을 표시할 모달 (Modal) -->
     <div id="quizModal" class="modal">
@@ -151,76 +197,79 @@
 </div>
 
 
-<script>
-    // 퀴즈 목록을 동적으로 보여주는 함수
-    async function showQuizzes(memberNo) {
-        const modal = document.getElementById('quizModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const quizListContainer = document.getElementById('quizListContainer');
+<script>// 퀴즈 목록을 동적으로 보여주는 함수
+async function showQuizzes(memberNo) {
+    const modal = document.getElementById('quizModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const quizListContainer = document.getElementById('quizListContainer');
 
-        // 로딩 메시지 표시
-        quizListContainer.innerHTML = '로딩 중...';
-        modal.style.display = 'block';
+    // 로딩 메시지 표시
+    quizListContainer.innerHTML = '로딩 중...';
+    modal.style.display = 'block';
 
-        try {
-            // API를 호출하여 퀴즈 데이터를 JSON으로 가져옵니다.
-            const response = await fetch(`/quiz/api/byMember?memberNo=${memberNo}`);
-            if (!response.ok) {
-                throw new Error('네트워크 응답이 올바르지 않습니다.');
-            }
-            const quizzes = await response.json();
-
-            // 가져온 데이터를 기반으로 퀴즈 목록 HTML을 생성합니다.
-            let htmlContent = '';
-            if (quizzes.length === 0) {
-                htmlContent = '<p>등록된 퀴즈가 없습니다.</p>';
-            } else {
-                htmlContent += '<table><thead><tr><th>내용</th><th>정답</th><th>등록일</th></tr></thead><tbody>';
-                quizzes.forEach(quiz => {
-                    htmlContent += `
-                        <tr>
-                            <td>${escapeHtml(quiz.content)}</td>
-                            <td>${escapeHtml(quiz.answer)}</td>
-                            <td>${new Date(quiz.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                    `;
-                });
-                htmlContent += '</tbody></table>';
-            }
-
-            // 모달 제목과 내용 업데이트
-            modalTitle.textContent = `${memberNo}번 회원이 등록한 퀴즈`;
-            quizListContainer.innerHTML = htmlContent;
-
-        } catch (error) {
-            console.error('퀴즈 데이터를 가져오는 중 오류 발생:', error);
-            quizListContainer.innerHTML = `<p>데이터를 불러오지 못했습니다. 오류: ${error.message}</p>`;
+    try {
+        // API를 호출하여 퀴즈 데이터를 JSON으로 가져옵니다.
+        const response = await fetch(`/quiz/api/byMember?memberNo=${memberNo}`);
+        if (!response.ok) {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
         }
-    }
+        const quizzes = await response.json();
 
-    // 모달을 닫는 함수
-    function closeModal() {
-        const modal = document.getElementById('quizModal');
-        modal.style.display = 'none';
-    }
-
-    // XSS 공격을 방지하기 위해 HTML 엔티티를 이스케이프하는 함수
-    function escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // 모달 외부 클릭 시 닫기
-    window.onclick = function(event) {
-        const modal = document.getElementById('quizModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
+        // 가져온 데이터를 기반으로 퀴즈 목록 HTML을 생성합니다.
+        let htmlContent = '';
+        if (quizzes.length === 0) {
+            htmlContent = '<p>등록된 퀴즈가 없습니다.</p>';
+        } else {
+            htmlContent += '<table><thead><tr><th>내용</th><th>정답</th><th>등록일</th></tr></thead><tbody>';
+            quizzes.forEach(quiz => {
+                // quiz.answer 값을 '예' 또는 '아니오'로 변환
+                const answerText = quiz.answer ? '예' : '아니오';
+                htmlContent += `
+                    <tr>
+                        <td>${escapeHtml(quiz.content)}</td>
+                        <td>${escapeHtml(answerText)}</td>
+                        <td>${new Date(quiz.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+            htmlContent += '</tbody></table>';
         }
+
+        // 모달 제목과 내용 업데이트
+        modalTitle.textContent = `${memberNo}번 회원이 등록한 퀴즈`;
+        quizListContainer.innerHTML = htmlContent;
+
+    } catch (error) {
+        console.error('퀴즈 데이터를 가져오는 중 오류 발생:', error);
+        quizListContainer.innerHTML = `<p>데이터를 불러오지 못했습니다. 오류: ${error.message}</p>`;
     }
+}
+
+// 모달을 닫는 함수
+function closeModal() {
+    const modal = document.getElementById('quizModal');
+    modal.style.display = 'none';
+}
+
+// XSS 공격을 방지하기 위해 HTML 엔티티를 이스케이프하는 함수
+// 입력값이 문자열이 아닐 경우(null, undefined 등) 빈 문자열로 변환합니다.
+function escapeHtml(unsafe) {
+    const safe = String(unsafe || '');
+    return safe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// 모달 외부 클릭 시 닫기
+window.onclick = function(event) {
+    const modal = document.getElementById('quizModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
 </script>
 </body>
 </html>

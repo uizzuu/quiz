@@ -15,6 +15,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -32,7 +33,13 @@ public class QuizController {
 
     // 퀴즈 목록 보기
     @GetMapping("/list")
-    public String quizList(Model model) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String quizList(Model model, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         List<QuizDto> quizList = quizService.getAllQuizzes();
         model.addAttribute("quizList", quizList);
         model.addAttribute("title", "퀴즈 목록");
@@ -98,7 +105,13 @@ public class QuizController {
 
     // 퀴즈 수정 폼
     @GetMapping("/updateForm/{id}")
-    public String updateForm(@PathVariable Long id, Model model) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         QuizDto quiz = quizService.findById(id);
         if (quiz == null) {
             return "redirect:/quiz/list";
@@ -112,8 +125,14 @@ public class QuizController {
 
     // 퀴즈 수정
     @PostMapping("/update")
+    // 📌[수정] 로그인 체크 로직 추가
     public String updateQuiz(@Valid @ModelAttribute("dto") QuizDto dto,
-                             BindingResult bindingResult, Model model) {
+                             BindingResult bindingResult, Model model, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         if (bindingResult.hasErrors()) {
             List<MemberDto> memberList = memberService.getApprovedMembers();
             model.addAttribute("memberList", memberList);
@@ -126,7 +145,13 @@ public class QuizController {
 
     // 퀴즈 삭제
     @PostMapping("/delete/{id}")
-    public String deleteQuiz(@PathVariable Long id) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String deleteQuiz(@PathVariable Long id, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         quizService.deleteQuiz(id);
         return "redirect:/quiz/list";
     }
@@ -165,10 +190,16 @@ public class QuizController {
 
     // 퀴즈 정답 체크
     @PostMapping("/check")
+    // 📌[수정] 로그인 체크 로직 추가
     public String checkAnswer(@RequestParam Long quizId,
                               @RequestParam Boolean userAnswer,
                               @RequestParam Long memberNo,
-                              Model model) {
+                              Model model,
+                              HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
 
         QuizDto quiz = quizService.findById(quizId);
         boolean isCorrect = quiz.getAnswer().equals(userAnswer);
@@ -189,5 +220,24 @@ public class QuizController {
         }
 
         return "quizResult";
+    }
+
+    // '등록 퀴즈 보기' 버튼 클릭 시 호출되는 API (JSON 반환)
+    @GetMapping("/api/byMember")
+    @ResponseBody
+    // 📌[수정] 로그인 체크 로직 추가
+    public List<QuizDto> getQuizzesByMemberApi(@RequestParam("memberNo") Long memberNo, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return Collections.emptyList(); // 빈 리스트 반환
+        }
+
+        try {
+            return quizService.findByMemberNo(memberNo);
+        } catch (Exception e) {
+            System.err.println("Error fetching quizzes for memberNo " + memberNo + ": " + e.getMessage());
+            // 예외 발생 시 빈 리스트를 반환하여 프론트엔드가 오류 없이 처리하게 함
+            return Collections.emptyList();
+        }
     }
 }

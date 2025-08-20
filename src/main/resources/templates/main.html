@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>메인</title>
@@ -12,6 +12,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        background-color: #f4f4f9;
     }
 
     .container {
@@ -21,6 +22,7 @@
         text-align: center;
         max-width: 800px;
         width: 90%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .logo {
@@ -156,10 +158,12 @@
   <!-- 통계 정보 -->
   <div class="stats">
     <div class="stat-item">
+      <!-- 📌[수정] totalQuizzes 값이 0으로 나오는 문제를 해결하기 위해 controller에서 값을 넘겨받도록 수정했습니다. -->
       <span class="stat-number" th:text="${totalQuizzes ?: 0}">0</span>
       <div class="stat-label">총 퀴즈수</div>
     </div>
     <div class="stat-item">
+      <!-- 📌[수정] totalPlays 값이 0으로 나오는 문제를 해결하기 위해 controller에서 값을 넘겨받도록 수정했습니다. -->
       <span class="stat-number" th:text="${totalPlays ?: 0}">0</span>
       <div class="stat-label">총 플레이수</div>
     </div>
@@ -178,7 +182,8 @@
       <div class="icon">📊</div>
       <h3>내 기록</h3>
       <p>내가 푼 퀴즈 기록과 점수를 확인할 수 있습니다.</p>
-      <a href="/member/myRecord" class="btn">내 기록 보기</a>
+      <!-- 📌[수정] 내 기록 보기 링크를 올바른 URL과 파라미터로 변경 -->
+      <a th:href="@{/member/info(updateId=${memberNo})}" class="btn">내 기록 보기</a>
     </div>
   </div>
 

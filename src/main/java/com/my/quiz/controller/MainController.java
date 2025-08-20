@@ -63,19 +63,24 @@ public class MainController {
         if (loggedInMember == null) {
             return "redirect:/";
         }
+
+        // 📌[수정] 통계 데이터를 관리자와 일반 회원 모두에게 전달하기 위해
+        // if-else문 밖으로 이동했습니다.
+        model.addAttribute("totalQuizzes", quizService.getTotalQuizCount());
+        model.addAttribute("totalPlays", playService.getTotalPlayCount());
+        model.addAttribute("memberName", loggedInMember.getId());
+        model.addAttribute("memberNo", loggedInMember.getNo());
+
         boolean isAdmin = "1".equals(loggedInMember.getRole());
 
         if (isAdmin) {
             model.addAttribute("isAdmin", true);
-            model.addAttribute("totalQuizzes", quizService.getTotalQuizCount());
-            model.addAttribute("totalPlays", playService.getTotalPlayCount());
             model.addAttribute("totalMembers", memberService.getTotalMemberCount());
             model.addAttribute("approvedMembers", memberService.getApprovedMemberCount());
-            return "index";
+            return "index"; // 관리자는 index.html로 이동
         } else {
             model.addAttribute("isAdmin", false);
-            model.addAttribute("memberName", loggedInMember.getId());
-            return "main";
+            return "main"; // 일반 회원은 main.html로 이동
         }
     }
 
@@ -116,23 +121,5 @@ public class MainController {
         model.addAttribute("quizStatsList", quizList);
 
         return "stats";
-    }
-
-    /**
-     * 특정 회원이 작성한 퀴즈 목록 페이지를 보여줍니다.
-     * @param memberNo 퀴즈 목록을 조회할 회원의 고유 번호
-     * @param model 모델 객체
-     * @return 퀴즈 목록 뷰의 이름
-     */
-    @GetMapping("/quiz/list/byMember")
-    public String getQuizzesByMember(@RequestParam("memberNo") Long memberNo, Model model) {
-        // QuizService를 통해 해당 회원이 작성한 퀴즈 목록을 가져옵니다.
-        List<QuizDto> quizzes = quizService.findByMemberNo(memberNo);
-
-        // 뷰로 퀴즈 목록 데이터를 전달합니다.
-        model.addAttribute("quizzes", quizzes);
-
-        // 새로운 HTML 템플릿(quizListByMember.html)을 반환합니다.
-        return "quizListByMember";
     }
 }

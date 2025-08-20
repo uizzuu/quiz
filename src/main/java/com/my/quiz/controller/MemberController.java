@@ -6,6 +6,7 @@ import com.my.quiz.dto.QuizDto;
 import com.my.quiz.service.MemberService;
 import com.my.quiz.service.PlayService;
 import com.my.quiz.service.QuizService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,8 +28,15 @@ public class MemberController {
     @Autowired
     QuizService quizService;
 
+
     @GetMapping("/list")
-    public String showMember(Model model) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String showMember(Model model, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         model.addAttribute("title", "Member");
         List<MemberDto> memberList = service.getAllList();
         model.addAttribute("list", memberList);
@@ -63,9 +71,16 @@ public class MemberController {
     }
 
     @GetMapping("/member/updateView")
+    // 📌[수정] 로그인 체크 로직 추가
     public String updateView(
             @RequestParam("updateId") String updateId,
-            Model model) {
+            Model model,
+            HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         // 1. 받은 수정 아이디로 데이터를 검색해온다(DTO)
         MemberDto dto = service.findMemberById(updateId);
         // 2. DTO가 비어있는지 확인한다. ID의 유무를 확인 -> 조치
@@ -79,8 +94,14 @@ public class MemberController {
     }
 
     @PostMapping("/member/update")
+    // 📌[수정] 로그인 체크 로직 추가
     public String update(@Valid @ModelAttribute("dto") MemberDto dto,
-                         BindingResult bindingResult) {
+                         BindingResult bindingResult,
+                         HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
         if (bindingResult.hasErrors()) {
             return "updateForm";
         }
@@ -88,16 +109,28 @@ public class MemberController {
         return "redirect:/list";
     }
 
-    // 승인 처리 - 매개변수 이름 수정
     @PostMapping("/member/approve")
-    public String approveMember(@RequestParam("updateId") Long memberNo) {
+    // 📌[수정] 로그인 및 관리자 역할 체크 로직 추가
+    public String approveMember(@RequestParam("updateId") Long memberNo,
+                                HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null || !"1".equals(loggedInMember.getRole())) {
+            return "redirect:/";
+        }
         service.approveMember(memberNo);
         return "redirect:/list";
     }
 
-    // 상세보기 처리
     @GetMapping("/member/info")
-    public String memberInfo(@RequestParam("updateId") Long memberNo, Model model) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String memberInfo(@RequestParam("updateId") Long memberNo,
+                             Model model,
+                             HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         // 1. 회원 정보 조회
         MemberDto member = service.findMember(memberNo);
         if (member == null) {
@@ -118,9 +151,16 @@ public class MemberController {
     }
 
     @GetMapping("/member/search")
+    // 📌[수정] 로그인 체크 로직 추가
     public String search(@RequestParam("type") String type,
                          @RequestParam("keyword") String keyword,
-                         Model model) {
+                         Model model,
+                         HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
+
         List<MemberDto> searchList = service.searchMember(type, keyword);
         if (ObjectUtils.isEmpty(searchList)) {
             // 검색 결과가 없을 경우
@@ -134,9 +174,13 @@ public class MemberController {
         return "showMember";
     }
 
-    // 삭제 처리 추가
     @PostMapping("/member/delete/{id}")
-    public String deleteMember(@PathVariable("id") Long id) {
+    // 📌[수정] 로그인 체크 로직 추가
+    public String deleteMember(@PathVariable("id") Long id, HttpSession session) {
+        MemberDto loggedInMember = (MemberDto) session.getAttribute("loggedInMember");
+        if (loggedInMember == null) {
+            return "redirect:/";
+        }
         service.deleteMember(id);
         return "redirect:/list";
     }
