@@ -123,7 +123,7 @@
                 <span th:if="*{answer}" class="answer-true">예</span>
                 <span th:unless="*{answer}" class="answer-false">아니오</span>
             </td>
-            <td th:text="*{memberNo}">작성자</td>
+            <td th:text="*{member.id}">작성자</td>
             <td th:text="${#temporals.format(quiz.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
             <td>
                 <a th:href="@{/quiz/updateForm/{id}(id=*{id})}" class="btn btn-warning">수정</a>
