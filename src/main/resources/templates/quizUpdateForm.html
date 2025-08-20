@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>새 퀴즈 등록</title>
+  <title>퀴즈 수정</title>
   <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -98,13 +98,26 @@
         text-align: center;
         margin-top: 30px;
     }
+
+    .form-text {
+        font-weight: bold;
+        color: #007bff;
+        padding: 10px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        display: inline-block;
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>📝 새 퀴즈 등록</h1>
+  <h1>📝 퀴즈 수정</h1>
 
-  <form th:action="@{/quiz/insert}" method="post" th:object="${dto}">
+  <!-- form 제출 시 컨트롤러의 /quiz/update 경로로 이동 -->
+  <form th:action="@{/quiz/update}" method="post" th:object="${dto}">
+    <!-- 퀴즈 ID는 숨겨진 필드로 전달하여 서버에서 식별 -->
+    <input type="hidden" th:field="*{id}">
+
     <div class="form-group">
       <label for="content">퀴즈 내용 *</label>
       <textarea id="content" name="content" th:field="*{content}"
@@ -116,7 +129,7 @@
       <label>정답 *</label>
       <div class="radio-group">
         <div class="radio-item">
-          <input type="radio" id="answer_true" name="answer" value="true" th:field="*{answer}">
+          <input type="radio" id="answer_true" name="answer" value="true" th:field="*{answer}" required>
           <label for="answer_true">예</label>
         </div>
         <div class="radio-item">
@@ -127,17 +140,16 @@
       <div th:if="${#fields.hasErrors('answer')}" th:errors="*{answer}" class="error"></div>
     </div>
 
-    <!-- 작성자 정보를 숨겨진 필드로 전달 -->
+    <!-- 작성자 정보는 수정 불가능하게 표시 -->
     <div class="form-group">
       <label>작성자</label>
-      <!-- 로그인된 회원의 ID를 화면에 표시 -->
-      <span class="form-text" th:text="${loggedInMember.id}">회원</span>
+      <span class="form-text" th:text="*{member.id}">회원</span>
       <!-- 폼 제출 시 필요한 회원 번호를 숨겨진 필드로 전달 -->
-      <input type="hidden" name="memberNo" th:value="${loggedInMember.no}">
+      <input type="hidden" name="memberNo" th:value="*{member.no}">
     </div>
 
     <div class="button-group">
-      <input type="submit" value="등록" class="btn btn-primary">
+      <input type="submit" value="수정 완료" class="btn btn-primary">
       <a href="/quiz/list" class="btn btn-secondary">취소</a>
     </div>
   </form>

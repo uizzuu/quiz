@@ -140,28 +140,31 @@
             이것은 샘플 퀴즈 질문입니다. 정답은 예 또는 아니오 중 하나입니다.
         </div>
 
-        <form method="post" action="/quiz/check">
-            <input type="hidden" name="quizId" th:value="${quiz.id}">
+        <!-- 로그인된 사용자가 있는 경우에만 퀴즈 폼을 표시 -->
+        <div th:if="${loggedInMember != null}">
+            <form method="post" action="/quiz/check">
+                <input type="hidden" name="quizId" th:value="${quiz.id}">
+                <input type="hidden" name="memberNo" th:value="${loggedInMember.no}">
 
-            <div class="member-select">
-                <label for="memberNo">플레이어 선택 (선택사항):</label>
-                <select id="memberNo" name="memberNo">
-                    <option value="">익명으로 플레이</option>
-                    <!-- 실제로는 승인된 회원 목록을 가져와야 함 -->
-                    <option value="1">테스트 유저</option>
-                </select>
-            </div>
+                <div class="member-select">
+                    <p>현재 플레이어: <strong><span th:text="${loggedInMember.id}"></span></strong></p>
+                </div>
 
-            <div class="answer-options">
-                <button type="submit" name="userAnswer" value="true" class="answer-btn btn-yes">
-                    ✅ 예
-                </button>
-                <button type="submit" name="userAnswer" value="false" class="answer-btn btn-no">
-                    ❌ 아니오
-                </button>
-            </div>
-        </form>
-    </div>
+                <div class="answer-options">
+                    <button type="submit" name="userAnswer" value="true" class="answer-btn btn-yes">
+                        ✅ 예
+                    </button>
+                    <button type="submit" name="userAnswer" value="false" class="answer-btn btn-no">
+                        ❌ 아니오
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 로그인되지 않은 경우 메시지 표시 -->
+        <div th:unless="${loggedInMember != null}">
+            <p>로그인 정보가 없습니다. 퀴즈를 시작하려면 로그인 해주세요.</p>
+        </div>
 
     <div class="navigation">
         <a href="/quiz/play" class="nav-btn">🔄 다른 퀴즈</a>

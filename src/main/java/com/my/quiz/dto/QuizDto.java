@@ -25,16 +25,29 @@ public class QuizDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // 작성자 정보를 담기 위한 필드 추가
+    private MemberDto member;
+
     // 엔티티를 받아서 Dto로 변환해 주는 함수
     public static QuizDto fromQuizEntity(Quiz quiz) {
-        return new QuizDto(
-                quiz.getId(),
-                quiz.getContent(),
-                quiz.getAnswer(),
-                quiz.getMember() != null ? quiz.getMember().getNo() : null,
-                quiz.getCreatedAt(),
-                quiz.getUpdatedAt()
-        );
+        QuizDto dto = new QuizDto();
+        dto.setId(quiz.getId());
+        dto.setContent(quiz.getContent());
+        dto.setAnswer(quiz.getAnswer());
+
+        // 작성자 정보가 있을 경우 DTO에 설정
+        if (quiz.getMember() != null) {
+            dto.setMemberNo(quiz.getMember().getNo());
+            MemberDto memberDto = new MemberDto();
+            memberDto.setNo(quiz.getMember().getNo());
+            memberDto.setId(quiz.getMember().getId());
+            dto.setMember(memberDto);
+        }
+
+        dto.setCreatedAt(quiz.getCreatedAt());
+        dto.setUpdatedAt(quiz.getUpdatedAt());
+
+        return dto;
     }
 
     // DTO를 받아서 Entity에 넣는 작업

@@ -23,6 +23,8 @@ public class MemberDto {
     private int answerFalse = 0;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    // 1: 관리자 / 0 : 사용자
+    private String role;
 
     // 엔티티를 받아서 Dto로 변환해 주는 함수
     public static MemberDto fromMemberEntity(Member member) {
@@ -34,7 +36,8 @@ public class MemberDto {
                 member.getAnswerTrue(),
                 member.getAnswerFalse(),
                 member.getCreatedAt(),
-                member.getUpdatedAt()
+                member.getUpdatedAt(),
+                member.getRole()
         );
     }
 

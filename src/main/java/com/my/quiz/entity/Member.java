@@ -38,6 +38,8 @@ public class Member {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    private String role;
+
     // Member가 작성한 Quiz 목록
     @ToString.Exclude
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

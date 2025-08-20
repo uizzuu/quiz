@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>나의 퀴즈 기록</title>
+  <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .container {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 800px;
+        width: 90%;
+        margin: 20px auto;
+    }
+    h1 {
+        color: #1a237e;
+        margin-bottom: 20px;
+    }
+    .section-title {
+        margin-top: 30px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #333;
+    }
+    .record-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 0.9em;
+    }
+    .record-table th, .record-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+    .record-table th {
+        background-color: #e8f5e9;
+        color: #388e3c;
+    }
+    .record-table td:nth-child(2) {
+        text-align: left;
+        max-width: 300px;
+    }
+    .btn-container {
+        margin-top: 30px;
+        text-align: center;
+    }
+    .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+    .status-correct {
+        color: blue;
+        font-weight: bold;
+    }
+    .status-incorrect {
+        color: red;
+        font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>나의 퀴즈 기록</h1>
+
+  <!-- 퀴즈 플레이 기록 섹션 -->
+  <h3 class="section-title">플레이 기록</h3>
+  <table class="record-table">
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>정답 수</th>
+      <th>오답 수</th>
+      <th>정답률</th>
+      <th>플레이 날짜</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${plays == null or #lists.isEmpty(plays)}">
+      <td colspan="5">아직 퀴즈 플레이 기록이 없습니다.</td>
+    </tr>
+    <tr th:unless="${plays == null or #lists.isEmpty(plays)}"
+        th:each="play : ${plays}" th:object="${play}">
+      <td th:text="*{id}">1</td>
+      <td th:text="*{yes}">5</td>
+      <td th:text="*{no}">2</td>
+      <td>
+                <span th:if="*{yes + no > 0}">
+                    <span th:text="${#numbers.formatDecimal((*{yes} * 100.0) / (*{yes} + *{no}), 1, 1)}">71.4</span>%
+                </span>
+        <span th:unless="*{yes + no > 0}">0%</span>
+      </td>
+      <!-- Thymeleaf 표준 문법으로 수정 -->
+      <td th:text="${#temporals.format(play.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 작성한 퀴즈 섹션 -->
+  <h3 class="section-title">내가 만든 퀴즈</h3>
+  <table class="record-table">
+    <thead>
+    <tr>
+      <th>퀴즈 번호</th>
+      <th>퀴즈 내용</th>
+      <th>정답</th>
+      <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${quizzes == null or #lists.isEmpty(quizzes)}">
+      <td colspan="4">작성한 퀴즈가 없습니다.</td>
+    </tr>
+    <tr th:unless="${quizzes == null or #lists.isEmpty(quizzes)}"
+        th:each="quiz : ${quizzes}" th:object="${quiz}">
+      <td th:text="*{id}">1</td>
+      <td th:text="*{content}" style="text-align: left; max-width: 300px;">퀴즈 내용</td>
+      <td>
+        <span th:if="*{answer}" class="status-correct">예</span>
+        <span th:unless="*{answer}" class="status-incorrect">아니오</span>
+      </td>
+      <!-- Thymeleaf 표준 문법으로 수정 -->
+      <td th:text="${#temporals.format(quiz.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 버튼 영역 -->
+  <div class="btn-container">
+    <a href="/main" class="btn">메인화면으로</a>
+  </div>
+</div>
+</body>
+</html>

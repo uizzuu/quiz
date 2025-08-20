@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -135,6 +136,16 @@ public class MemberService {
                 .toList();
     }
 
+
+    // 수정: 승인된 회원 중 관리자(role이 '1')를 제외한 목록을 가져오는 메소드
+    public List<MemberDto> getApprovedNonAdminMembers() {
+        // 기존의 getApprovedMembers()를 사용하여 승인된 회원 목록을 가져옴
+        return getApprovedMembers().stream()
+                // 관리자(role이 "1")를 제외하고 필터링
+                .filter(member -> !"1".equals(member.getRole()))
+                .collect(Collectors.toList());
+    }
+
     // 회원 점수 업데이트
     public void updateScore(Long memberNo, boolean isCorrect) {
         Member member = repository.findById(memberNo).orElse(null);
@@ -145,6 +156,37 @@ public class MemberService {
                 member.setAnswerFalse(member.getAnswerFalse() + 1);
             }
             repository.save(member);
+        }
+    }
+
+    public MemberDto findMemberByUsername(String username) {
+        Member member = repository.findById(username).orElse(null);
+        if (member != null) {
+            return MemberDto.fromMemberEntity(member);
+        }
+        return null;
+    }
+
+    /**
+     * 사용자의 역할에 따라 퀴즈 플레이 횟수를 계산하여 반환합니다.
+     * 관리자('1')일 경우 모든 회원의 총 플레이 횟수를,
+     * 일반 사용자일 경우 해당 회원의 플레이 횟수만 반환합니다.
+     * @param memberNo 플레이 횟수를 조회할 회원의 고유 번호
+     * @param role 현재 사용자의 역할
+     * @return 퀴즈 플레이 횟수 (long)
+     */
+    public long getTotalPlays(Long memberNo, String role) {
+        // 관리자 역할(role이 "1")인지 확인
+        if ("1".equals(role)) {
+            // 모든 회원의 플레이 횟수를 합산하여 반환
+            return repository.findAll().stream()
+                    .mapToLong(member -> (long) member.getAnswerTrue() + member.getAnswerFalse())
+                    .sum();
+        } else {
+            // 일반 사용자인 경우, 자신의 플레이 횟수만 반환
+            return repository.findById(memberNo)
+                    .map(member -> (long) member.getAnswerTrue() + member.getAnswerFalse())
+                    .orElse(0L); // 회원이 존재하지 않을 경우 0 반환
         }
     }
 }

@@ -2,7 +2,7 @@
 <html xmlns:th="www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>퀴즈</title>
+  <title>메인</title>
   <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -54,10 +54,6 @@
         border: 2px solid transparent;
         transition: all 0.3s ease;
         cursor: pointer;
-    }
-
-    .menu-card:last-of-type{
-        grid-column: 1 / -1;
     }
 
     .menu-card:hover {
@@ -151,14 +147,14 @@
 <body>
 <div class="container">
   <div class="logo"><span>🎯</span> 퀴즈</div>
-  <div class="subtitle">재미있는 퀴즈로 지식을 테스트해보세요!</div>
+  <div class="subtitle">
+    <span th:text="|안녕하세요, ${memberName}님! 재미있는 퀴즈로 지식을 테스트해보세요!|">
+      안녕하세요! 재미있는 퀴즈로 지식을 테스트해보세요!
+    </span>
+  </div>
 
   <!-- 통계 정보 -->
   <div class="stats">
-    <div class="stat-item">
-      <span class="stat-number" th:text="${totalMembers ?: 0}">0</span>
-      <div class="stat-label">총 회원수</div>
-    </div>
     <div class="stat-item">
       <span class="stat-number" th:text="${totalQuizzes ?: 0}">0</span>
       <div class="stat-label">총 퀴즈수</div>
@@ -167,39 +163,27 @@
       <span class="stat-number" th:text="${totalPlays ?: 0}">0</span>
       <div class="stat-label">총 플레이수</div>
     </div>
-    <div class="stat-item">
-      <span class="stat-number" th:text="${approvedMembers ?: 0}">0</span>
-      <div class="stat-label">승인된 회원</div>
-    </div>
   </div>
 
   <!-- 메뉴 카드들 -->
   <div class="menu-grid">
     <div class="menu-card">
-      <div class="icon">👥</div>
-      <h3>회원 관리</h3>
-      <p>회원 목록을 확인하고 관리할 수 있습니다. 회원 승인, 수정, 삭제 등의 기능을 제공합니다.</p>
-      <a href="/list" class="btn">회원 목록 보기</a>
-    </div>
-
-    <div class="menu-card">
-      <div class="icon">📝</div>
-      <h3>퀴즈 관리</h3>
-      <p>퀴즈를 등록하고 관리할 수 있습니다. 다양한 주제의 퀴즈를 만들어 보세요.</p>
-      <a href="/quiz/list" class="btn">퀴즈 목록 보기</a>
+      <div class="icon">🎮</div>
+      <h3>퀴즈 플레이</h3>
+      <p>등록된 퀴즈를 풀어보고 점수를 확인할 수 있습니다. 지식을 테스트해보세요!</p>
+      <a href="/quiz/play" class="btn">퀴즈 풀기</a>
     </div>
 
     <div class="menu-card">
       <div class="icon">📊</div>
-      <h3>통계 보기</h3>
-      <p>전체적인 퀴즈 통계와 회원들의 성과를 확인할 수 있습니다.</p>
-      <a href="/stats" class="btn">통계 보기</a>
+      <h3>내 기록</h3>
+      <p>내가 푼 퀴즈 기록과 점수를 확인할 수 있습니다.</p>
+      <a href="/member/myRecord" class="btn">내 기록 보기</a>
     </div>
   </div>
 
-  <!-- 빠른 액션 버튼들 -->
+  <!-- 로그아웃 버튼 -->
   <div style="margin: 30px 0;">
-    <a href="/member/insertForm" class="btn" style="margin: 0 10px;">새 회원 등록</a>
     <a href="/quiz/insertForm" class="btn" style="margin: 0 10px;">새 퀴즈 등록</a>
     <a href="/logout" class="btn" style="margin: 0 10px;">로그아웃</a>
   </div>
