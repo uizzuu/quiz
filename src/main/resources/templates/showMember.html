@@ -55,37 +55,38 @@
             <td colspan="11">데이터가 없습니다.</td>
         </tr>
         <tr th:unless="${list == null or #lists.isEmpty(list)}"
-            th:each="member : ${list}" th:object="${member}">
-            <td th:text="*{no}">1</td>
-            <td th:text="*{id}">root</td>
-            <td th:text="*{password}">password</td>
-            <td th:text="*{status} ? '승인' : '미승인'">미승인</td>
-            <td th:text="*{answerTrue}">0</td>
-            <td th:text="*{answerFalse}">0</td>
-            <td th:text="${#temporals.format(member.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+            th:each="member : ${list}">
+            <td th:text="${member.no}">1</td>
+            <td th:text="${member.id}">root</td>
+            <td th:text="${member.password}">password</td>
+            <td th:text="${member.status} ? '승인' : '미승인'">미승인</td>
+            <td th:text="${member.answerTrue}">0</td>
+            <td th:text="${member.answerFalse}">0</td>
+            <!-- 등록일 -->
+            <td th:text="${member.formattedCreatedAt}">정보 없음</td>
             <td class="td-back">
                 <form th:action="@{/member/approve}" method="post"
-                      th:if="*{status} == false">
-                    <input type="hidden" name="updateId" th:value="*{no}">
+                      th:if="${member.status == false}">
+                    <input type="hidden" name="updateId" th:value="${member.no}">
                     <input type="submit" value="승인"
                            onclick="return confirm('승인하시겠습니까?')">
                 </form>
-                <span th:if="*{status} == true" style="color: green; font-size:14px;">승인완료</span>
+                <span th:if="${member.status == true}" style="color: green; font-size:14px;">승인완료</span>
             </td>
             <td class="td-back">
                 <form th:action="@{/member/info}" method="get">
-                    <input type="hidden" name="updateId" th:value="*{no}" />
+                    <input type="hidden" name="updateId" th:value="${member.no}" />
                     <input type="submit" value="상세보기" />
                 </form>
             </td>
             <td class="td-back">
                 <form th:action="@{/member/updateView}" method="get">
-                    <input type="hidden" name="updateId" th:value="*{id}">
+                    <input type="hidden" name="updateId" th:value="${member.id}">
                     <input type="submit" value="수정">
                 </form>
             </td>
             <td class="td-back">
-                <form th:action="@{/member/delete/{id}(id=*{no})}" method="post">
+                <form th:action="@{/member/delete/{id}(id=${member.no})}" method="post">
                     <input type="submit" value="삭제"
                            onclick="return confirm('정말 삭제하시겠습니까?')">
                 </form>
@@ -100,7 +101,7 @@
     <div class="form-container">
         <form th:action="@{/member/search}" method="get">
             <select name="type">
-<!--                <option value="">전체보기</option>-->
+                <!--                <option value="">전체보기</option>-->
                 <option value="id">아이디</option>
             </select>
             <input type="text" name="keyword" placeholder="검색어를 입력하세요">

@@ -102,15 +102,14 @@
       <td colspan="5">아직 퀴즈 플레이 기록이 없습니다.</td>
     </tr>
     <tr th:unless="${plays == null or #lists.isEmpty(plays)}"
-        th:each="play : ${plays}" th:object="${play}">
-      <td th:text="*{id}">1</td>
-      <td th:text="*{yes}">5</td>
-      <td th:text="*{no}">2</td>
-      <td>
-                <span th:if="*{yes + no > 0}">
-                    <span th:text="${#numbers.formatDecimal((*{yes} * 100.0) / (*{yes} + *{no}), 1, 1)}">71.4</span>%
-                </span>
-        <span th:unless="*{yes + no > 0}">0%</span>
+        th:each="play : ${plays}">
+      <td th:text="${play.id}">1</td>
+      <td th:text="${play.yes}">5</td>
+      <td th:text="${play.no}">2</td>
+      <!-- 정답률 계산 로직을 지역 변수와 th:if로 수정하여 0으로 나누는 오류 방지 -->
+      <td th:with="totalQuestions=${play.yes + play.no}">
+        <span th:if="${totalQuestions > 0}" th:text="${#numbers.formatDecimal((play.yes * 100.0) / totalQuestions, 1, 1)} + '%'">71.4%</span>
+        <span th:unless="${totalQuestions > 0}" th:text="'0%'">0%</span>
       </td>
       <!-- Thymeleaf 표준 문법으로 수정 -->
       <td th:text="${#temporals.format(play.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>

@@ -1,8 +1,7 @@
 package com.my.quiz.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,6 +14,9 @@ import java.util.List;
 @Data
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@AllArgsConstructor // 이 생성자를 추가하여 @Builder와 함께 사용 가능하게 합니다.
+@Builder // Member 클래스에 @Builder 어노테이션을 추가합니다.
 public class Member {
 
     @Id
@@ -40,12 +42,13 @@ public class Member {
 
     private String role;
 
-    // Member가 작성한 Quiz 목록
+    // Member가 작성한 Quiz 목록 (toString 순환 참조 방지)
     @ToString.Exclude
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
 
-    // Member가 기록한 Play 목록
+    // Member가 플레이한 기록 목록 (toString 순환 참조 방지)
+    @ToString.Exclude
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Play> plays = new ArrayList<>();
 }

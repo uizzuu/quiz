@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 통계</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            text-align: center;
+        }
+        h1, h2 {
+            color: #555;
+            margin-top: 40px;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        /* 퀴즈 목록 모달 스타일 */
+        .modal {
+            display: none; /* 초기에는 숨김 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>관리자 통계</h1>
+
+    <!-- 회원별 통계 테이블 -->
+    <h2>회원별 통계</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>아이디</th>
+            <th>총 정답률</th>
+            <th>플레이한 퀴즈 수</th>
+            <th>등록한 퀴즈 수</th>
+            <th>등록 퀴즈 보기</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(memberStatsList)}">
+            <td colspan="5">회원 통계 데이터가 없습니다.</td>
+        </tr>
+        <tr th:unless="${#lists.isEmpty(memberStatsList)}"
+            th:each="member : ${memberStatsList}">
+            <td th:text="${member.id}">testuser</td>
+            <td th:text="${#numbers.formatDecimal(member.correctRate, 0, 2)} + '%'">0.00%</td>
+            <td th:text="${member.totalPlays}">0</td>
+            <td th:text="${member.totalQuizzes}">0</td>
+            <td>
+                <!-- 'member.memberNo'를 'member.no'로 수정합니다. -->
+                <button onclick="showQuizzes(this.getAttribute('data-member-no'))"
+                        th:attr="data-member-no=${member.no}">보기</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 퀴즈별 통계 테이블 -->
+    <h2>퀴즈별 통계</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>퀴즈 내용</th>
+            <th>정답률</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(quizStatsList)}">
+            <td colspan="2">퀴즈 통계 데이터가 없습니다.</td>
+        </tr>
+        <tr th:unless="${#lists.isEmpty(quizStatsList)}"
+            th:each="quiz : ${quizStatsList}">
+            <td th:text="${quiz.content}">퀴즈 내용입니다.</td>
+            <td th:text="${#numbers.formatDecimal(quiz.correctRate, 0, 2)} + '%'">0.00%</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a class="back-link" th:href="@{/member/list}">멤버 리스트로 돌아가기</a>
+
+    <!-- 퀴즈 목록을 표시할 모달 (Modal) -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <div id="quizListContainer">
+                <!-- 여기에 퀴즈 목록이 동적으로 삽입됩니다 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // 퀴즈 목록을 동적으로 보여주는 함수
+    async function showQuizzes(memberNo) {
+        const modal = document.getElementById('quizModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const quizListContainer = document.getElementById('quizListContainer');
+
+        // 로딩 메시지 표시
+        quizListContainer.innerHTML = '로딩 중...';
+        modal.style.display = 'block';
+
+        try {
+            // API를 호출하여 퀴즈 데이터를 JSON으로 가져옵니다.
+            const response = await fetch(`/quiz/api/byMember?memberNo=${memberNo}`);
+            if (!response.ok) {
+                throw new Error('네트워크 응답이 올바르지 않습니다.');
+            }
+            const quizzes = await response.json();
+
+            // 가져온 데이터를 기반으로 퀴즈 목록 HTML을 생성합니다.
+            let htmlContent = '';
+            if (quizzes.length === 0) {
+                htmlContent = '<p>등록된 퀴즈가 없습니다.</p>';
+            } else {
+                htmlContent += '<table><thead><tr><th>내용</th><th>정답</th><th>등록일</th></tr></thead><tbody>';
+                quizzes.forEach(quiz => {
+                    htmlContent += `
+                        <tr>
+                            <td>${escapeHtml(quiz.content)}</td>
+                            <td>${escapeHtml(quiz.answer)}</td>
+                            <td>${new Date(quiz.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                });
+                htmlContent += '</tbody></table>';
+            }
+
+            // 모달 제목과 내용 업데이트
+            modalTitle.textContent = `${memberNo}번 회원이 등록한 퀴즈`;
+            quizListContainer.innerHTML = htmlContent;
+
+        } catch (error) {
+            console.error('퀴즈 데이터를 가져오는 중 오류 발생:', error);
+            quizListContainer.innerHTML = `<p>데이터를 불러오지 못했습니다. 오류: ${error.message}</p>`;
+        }
+    }
+
+    // 모달을 닫는 함수
+    function closeModal() {
+        const modal = document.getElementById('quizModal');
+        modal.style.display = 'none';
+    }
+
+    // XSS 공격을 방지하기 위해 HTML 엔티티를 이스케이프하는 함수
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        const modal = document.getElementById('quizModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>

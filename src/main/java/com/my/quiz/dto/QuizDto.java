@@ -27,6 +27,8 @@ public class QuizDto {
 
     // 작성자 정보를 담기 위한 필드 추가
     private MemberDto member;
+    // MainController 오류 해결을 위해 correctRate 필드를 추가합니다.
+    private double correctRate;
 
     // 엔티티를 받아서 Dto로 변환해 주는 함수
     public static QuizDto fromQuizEntity(Quiz quiz) {

@@ -1,55 +1,91 @@
 package com.my.quiz.dto;
 
 import com.my.quiz.entity.Member;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MemberDto {
     private Long no;
-    @NotBlank(message = "아이디는 반드시 입력하셔야 합니다.")
     private String id;
     private String password;
-    private Boolean status = false;
-    private int answerTrue = 0;
-    private int answerFalse = 0;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    // 1: 관리자 / 0 : 사용자
     private String role;
+    private boolean status;
+    private int answerTrue;
+    private int answerFalse;
+    private LocalDateTime createdAt;  // boolean에서 LocalDateTime으로 변경
+    private LocalDateTime updatedAt;  // boolean에서 LocalDateTime으로 변경
 
-    // 엔티티를 받아서 Dto로 변환해 주는 함수
-    public static MemberDto fromMemberEntity(Member member) {
-        return new MemberDto(
-                member.getNo(),
-                member.getId(),
-                member.getPassword(),
-                member.getStatus(),
-                member.getAnswerTrue(),
-                member.getAnswerFalse(),
-                member.getCreatedAt(),
-                member.getUpdatedAt(),
-                member.getRole()
-        );
+    // 통계 데이터를 담기 위해 추가된 필드들
+    private long totalPlays;
+    private long totalQuizzes;
+    private double correctRate;
+
+    public String getFormattedCreatedAt() {
+        if (this.createdAt != null) {
+            return this.createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        }
+        return "정보 없음";
     }
 
-    // DTO를 받아서 Entity에 넣는 작업
+    public String getFormattedUpdatedAt() {
+        if (this.updatedAt != null) {
+            return this.updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        }
+        return "정보 없음";
+    }
+
+    /**
+     * 엔티티(Member)를 DTO(MemberDto)로 변환하는 함수입니다.
+     * Builder 패턴을 사용하여 안정적으로 필드를 매핑합니다.
+     * @param member 변환할 Member 엔티티
+     * @return 변환된 MemberDto 객체
+     */
+    public static MemberDto fromMemberEntity(Member member) {
+        if (member == null) {
+            return null;
+        }
+        return MemberDto.builder()
+                .no(member.getNo())
+                .id(member.getId())
+                .password(member.getPassword())
+                .role(member.getRole())
+                .status(member.getStatus())
+                .answerTrue(member.getAnswerTrue())
+                .answerFalse(member.getAnswerFalse())
+                .createdAt(member.getCreatedAt())  // 추가
+                .updatedAt(member.getUpdatedAt())  // 추가
+                .build();
+    }
+
+    /**
+     * DTO(MemberDto)를 엔티티(Member)로 변환하는 함수입니다.
+     * Builder 패턴을 사용하여 안정적으로 필드를 매핑합니다.
+     * @param dto 변환할 MemberDto 객체
+     * @return 변환된 Member 엔티티
+     */
     public static Member fromMemberDto(MemberDto dto) {
-        Member member = new Member();
-        member.setNo(dto.getNo());
-        member.setId(dto.getId());
-        member.setPassword(dto.getPassword());
-        member.setStatus(dto.getStatus());
-        member.setAnswerTrue(dto.getAnswerTrue());
-        member.setAnswerFalse(dto.getAnswerFalse());
-        return member;
+        if (dto == null) {
+            return null;
+        }
+        return Member.builder()
+                .no(dto.getNo())
+                .id(dto.getId())
+                .password(dto.getPassword())
+                .role(dto.getRole())
+                .status(dto.isStatus())
+                .answerTrue(dto.getAnswerTrue())
+                .answerFalse(dto.getAnswerFalse())
+                .createdAt(dto.getCreatedAt())  // 추가
+                .updatedAt(dto.getUpdatedAt())  // 추가
+                .build();
     }
 }

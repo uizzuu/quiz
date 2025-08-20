@@ -4,6 +4,7 @@ import com.my.quiz.dto.MemberDto;
 import com.my.quiz.dto.QuizDto;
 import com.my.quiz.entity.Member;
 import com.my.quiz.service.MemberService;
+import com.my.quiz.service.PlayService;
 import com.my.quiz.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -25,6 +26,9 @@ public class QuizController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private PlayService playService; // PlayService를 주입합니다.
 
     // 퀴즈 목록 보기
     @GetMapping("/list")
@@ -168,6 +172,11 @@ public class QuizController {
 
         QuizDto quiz = quizService.findById(quizId);
         boolean isCorrect = quiz.getAnswer().equals(userAnswer);
+
+
+        // 플레이 기록을 저장하는 로직을 추가합니다.
+        // 수정된 부분: playService.savePlay 메서드에 quizId를 추가로 전달합니다.
+        playService.savePlay(quizId, memberNo, isCorrect);
 
         model.addAttribute("quiz", quiz);
         model.addAttribute("userAnswer", userAnswer);

@@ -142,21 +142,17 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:if="${plays == null or #lists.isEmpty(plays)}">
-      <td colspan="5">아직 퀴즈 플레이 기록이 없습니다.</td>
-    </tr>
-    <tr th:unless="${plays == null or #lists.isEmpty(plays)}"
-        th:each="play : ${plays}" th:object="${play}">
-      <td th:text="*{id}">1</td>
-      <td th:text="*{yes}">5</td>
-      <td th:text="*{no}">2</td>
-      <td>
-                    <span th:if="*{yes + no > 0}">
-                        <span th:text="${#numbers.formatDecimal((*{yes} * 100.0) / (*{yes} + *{no}), 1, 1)}">71.4</span>%
-                    </span>
-        <span th:unless="*{yes + no > 0}">0%</span>
+    <tr th:each="play : ${plays}">
+      <td th:text="${play.id}"></td>
+      <td th:text="${play.yes}"></td>
+      <td th:text="${play.no}"></td>
+      <!-- 0으로 나누기 오류를 방지하기 위해 조건문 추가 -->
+      <td th:with="totalPlayQuestions=${play.yes + play.no}">
+                    <span th:if="${totalPlayQuestions > 0}"
+                          th:text="${#numbers.formatDecimal((play.yes * 100.0) / totalPlayQuestions, 1, 1)} + '%'"></span>
+        <span th:unless="${totalPlayQuestions > 0}" th:text="'0.0%'"></span>
       </td>
-      <td th:text="${#temporals.format(play.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+      <td th:text="${#temporals.format(play.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
     </tr>
     </tbody>
   </table>

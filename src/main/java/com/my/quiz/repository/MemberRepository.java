@@ -1,6 +1,5 @@
 package com.my.quiz.repository;
 
-import com.my.quiz.dto.MemberDto;
 import com.my.quiz.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +31,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 승인된 회원 목록 조회
     List<Member> findByStatusOrderByIdAsc(boolean status);
 
-    //
+    // Long 타입의 no로 멤버를 찾기 위한 메서드 추가
+    Optional<Member> findByNo(Long no);
 }
