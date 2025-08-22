@@ -1,65 +1,258 @@
 <!DOCTYPE html>
 <html xmlns:th="www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
   <title>회원정보 수정</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .logo {
+      font-size: 2.7em;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 30px;
+    }
+
+    .form-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+      text-align: left;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    :is(.form-group input) {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.9em;
+      color: #333;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+
+    :is(.form-group input):focus {
+      outline: none;
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .btn {
+      width: 100%;
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 0.9em;
+      background-color: #111;
+      border: 2px solid #111;
+      color: #fff;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #f9f9f9;
+      color: #111;
+    }
+
+    /* --- 커스텀 select --- */
+    .custom-select {
+      position: relative;
+      width: 100%;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.3s, border-radius 0.3s;
+      box-sizing: border-box;
+      font-size: 0.9em;
+      color: #333;
+      background-color: #fff;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .custom-select.active {
+      border-color: #667eea;
+      border-radius: 8px 8px 0 0;
+      color: #667eea;
+    }
+
+    .custom-select .selected {
+      box-sizing: border-box;
+      width: calc(100% - 4px);
+      padding: 12px;
+      border-radius: 8px;
+      background-color: transparent;
+    }
+
+    .custom-select .options {
+      box-sizing: border-box;
+      position: absolute;
+      top: 100%;
+      left: -2px;
+      width: calc(100% + 4px);
+      overflow: hidden;
+      max-height: 0;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      /* 아래쪽만 둥글게 */
+      background: #fff;
+      transition: max-height 0.3s ease;
+      z-index: 10;
+    }
+
+    .custom-select.active .options {
+      max-height: 200px;
+      border: 2px solid #667eea;
+      border-top: none;
+      padding: 0 10px 12px;
+      color: #666;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .custom-select .options div {
+      padding: 8px 4px;
+      cursor: pointer;
+    }
+
+    .custom-select .options div:hover {
+      background: #f0f0f0;
+    }
+
+    .form-group.status-form select {
+      display: none;
+      /* 실제 select 숨기기 */
+    }
+  </style>
 </head>
+
 <body>
-<h1>회원정보 수정</h1>
-<form th:action="@{/member/update}" method="post" th:object="${dto}">
-  <!-- 회원번호는 hidden으로 전달 -->
-  <input type="hidden" th:field="*{no}">
+  <div class="container">
+    <div class="logo">회원 정보 수정</div>
+    <form class="form-wrap" th:action="@{/member/update}" method="post" th:object="${dto}"
+      onsubmit="return confirmPassword()">
+      <input type="hidden" th:field="*{no}">
 
-  <div>
-    <label for="id">아이디</label>
-    <input type="text" id="id" name="id" th:field="*{id}" required>
-    <div th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
+      <div class="form-group">
+        <label for="id">아이디</label>
+        <input type="text" id="id" name="id" th:field="*{id}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" name="password" th:field="*{password}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password2">비밀번호 확인</label>
+        <input type="password" id="password2" name="password2">
+      </div>
+
+      <!-- 커스텀 select -->
+      <div class="form-group status-form">
+        <label for="status">승인상태</label>
+        <select id="status" name="status" th:field="*{status}">
+          <option value="false">미승인</option>
+          <option value="true">승인</option>
+        </select>
+
+        <div class="custom-select">
+          <div class="selected">미승인</div>
+          <div class="options">
+            <div data-value="false">미승인</div>
+            <div data-value="true">승인</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="answerTrue">정답 수</label>
+        <input type="number" id="answerTrue" name="answerTrue" th:field="*{answerTrue}" min="0">
+      </div>
+
+      <div class="form-group">
+        <label for="answerFalse">오답 수</label>
+        <input type="number" id="answerFalse" name="answerFalse" th:field="*{answerFalse}" min="0">
+      </div>
+
+      <br>
+      <input type="submit" value="수정완료" class="btn">
+      <input type="button" value="취소" onclick="location.href='/list'" class="btn">
+    </form>
+    <br>
+    <a th:href="@{/list}">목록으로</a>
   </div>
 
-  <div>
-    <label for="password">비밀번호</label>
-    <input type="password" id="password" name="password" th:field="*{password}" required>
-    <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-  </div>
-  <div>
-    <label for="password2">비밀번호 확인</label>
-    <input type="password" id="password2" name="password2">
-  </div>
-
-  <div>
-    <label for="status">승인상태</label>
-    <select id="status" name="status" th:field="*{status}">
-      <option value="false">미승인</option>
-      <option value="true">승인</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="answerTrue">정답 수</label>
-    <input type="number" id="answerTrue" name="answerTrue" th:field="*{answerTrue}" min="0">
-  </div>
-
-  <div>
-    <label for="answerFalse">오답 수</label>
-    <input type="number" id="answerFalse" name="answerFalse" th:field="*{answerFalse}" min="0">
-  </div>
-
-  <br>
-  <input type="submit" value="수정완료">
-  <input type="button" value="취소" onclick="location.href='/list'">
-</form>
-<br>
-<a th:href="@{/list}">목록으로</a>
-<script>
-  function confirmPassword(){
+  <script>
+    function confirmPassword() {
       const pw = document.querySelector("#password").value;
       const pw2 = document.querySelector("#password2").value;
-      if(pw !== pw2){
-          alert("비밀번호가 일치하지 않아요");
-          return false; // 폼을 post로 제출하는 것을 막는것
+      if (pw !== pw2) {
+        alert("비밀번호가 일치하지 않아요");
+        return false;
       }
-      return true;  // 통과하면 submit 실행
-  }
-</script>
+      return true;
+    }
+
+    const customSelect = document.querySelector('.custom-select');
+    const selected = customSelect.querySelector('.selected');
+    const options = customSelect.querySelector('.options');
+    const optionItems = options.querySelectorAll('div');
+    const realSelect = document.getElementById('status');
+
+    customSelect.addEventListener('click', (e) => {
+      customSelect.classList.toggle('active');
+    });
+
+    optionItems.forEach(option => {
+      option.addEventListener('click', () => {
+        selected.textContent = option.textContent;
+        realSelect.value = option.dataset.value;
+        customSelect.classList.remove('active');
+        realSelect.dispatchEvent(new Event('change'));
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!customSelect.contains(e.target)) {
+        customSelect.classList.remove('active');
+      }
+    });
+  </script>
 </body>
+
 </html>

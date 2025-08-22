@@ -1,40 +1,155 @@
 <!DOCTYPE html>
 <html xmlns:th="www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+
+    .container{
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .logo {
+      font-size: 2.7em;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 10px;
+    }
+
+    .logo>span {
+      font-size: 0.8em;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .form-group:last-of-type {
+      margin-bottom: 36px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      width: 100%;
+      display: inline-block;
+      padding: 8px 15px;
+      padding: 12px 25px;
+      font-size: 0.9em;
+      background-color: #111;
+      border: 2px solid #111;
+      color: #fff;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #f9f9f9;
+      color: #111;
+    }
+
+    .error-message {
+      color: #dc3545;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #dc3545;
+      border-radius: 5px;
+      background-color: #f8d7da;
+    }
+
+    .footer {
+      margin-top: 30px;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    a {
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
-<form th:action="@{/member/insert}" method="post"
-      th:object="${dto}"  onsubmit="return confirmPassword()">
-  <div>
-    <label for="id">아이디</label>
-    <input type="text" id="id" name="id" th:field="*{id}" required>
-    <div th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
+<div class="container">
+  <div class="logo"><span>🎯</span> 회원가입</div>
+  <div class="subtitle">회원가입하여 퀴즈를 시작해보세요!</div>
+  <form th:action="@{/member/insert}" method="post" th:object="${dto}" onsubmit="return confirmPassword()">
+    <div class="form-group">
+      <label for="id">아이디</label>
+      <input type="text" id="id" name="id" th:field="*{id}" required>
+      <div th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
+    </div>
+    <div class="form-group">
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" name="password" th:field="*{password}">
+      <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+    <div class="form-group">
+      <label for="password2">비밀번호 확인</label>
+      <input type="password" id="password2" name="password2">
+    </div>
+    <br>
+    <input type="submit" class="btn" value="회원가입">
+  </form>
+  <br />
+  <a th:href="@{/}">메인화면으로 돌아가기</a>
   </div>
-  <div>
-    <label for="password">비밀번호</label>
-    <input type="password" id="password" name="password" th:field="*{password}">
-    <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-  </div>
-  <div>
-    <label for="password2">비밀번호 확인</label>
-    <input type="password" id="password2" name="password2">
-  </div>
-  <br>
-  <input type="submit" value="회원가입">
-</form>
-<a th:href="@{/}">메인화면</a>
-<script>
-  function confirmPassword(){
+  <script>
+    function confirmPassword() {
       const pw = document.querySelector("#password").value;
       const pw2 = document.querySelector("#password2").value;
-      if(pw !== pw2){
-          alert("비밀번호가 일치하지 않아요");
-          return false; // 폼을 post로 제출하는 것을 막는것
+      if (pw !== pw2) {
+        alert("비밀번호가 일치하지 않아요");
+        return false; // 폼을 post로 제출하는 것을 막는것
       }
       return true;  // 통과하면 submit 실행
-  }
-</script>
+    }
+  </script>
 </body>
+
 </html>
